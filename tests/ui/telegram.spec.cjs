@@ -52,3 +52,47 @@ test('authenticated but sending disabled keeps review allowed and send blocked',
   await expect(page.locator('#tg-resolve')).toBeEnabled();
   await expect(page.locator('#tg-send')).toBeDisabled();
 });
+
+test('expired QR code is automatically renewed while page remains open', async ({page}) => {
+  await setup(page, {state: 'disconnected', sendingEnabled: false});
+  let requests = 0;
+  await page.route('http://churchcrm.test/plugins/telegram-client/api/qr', (route) => {
+    requests++;
+    return route.fulfill({status: 200, contentType: 'application/json',
+      body: JSON.stringify({success: true, data: {state: 'qr', image: 'data:image/png;base64,aGVsbG8=', expiresIn: 1}})});
+  });
+  await page.locator('#tg-qr-button').click();
+  await expect.poll(() => requests, {timeout: 7000}).toBeGreaterThan(1);
+});
+
+test('two-factor password is erased from the form after completion', async ({page}) => {
+  const account = {state: 'needs_2fa', sendingEnabled: false};
+  await setup(page, account);
+  await page.route('http://churchcrm.test/plugins/telegram-client/api/2fa', (route) => {
+    account.state = 'authenticated';
+    account.account = {name: 'Church', username: 'church_account'};
+    return route.fulfill({status: 200, contentType: 'application/json',
+      body: JSON.stringify({success: true, data: {state: 'authenticated'}})});
+  });
+  await page.locator('#tg-password').fill('password-used-only-for-login');
+  await page.locator('#tg-2fa-area button').click();
+  await expect(page.locator('#tg-password')).toHaveValue('');
+  await expect(page.locator('#tg-status')).toContainText('connected');
+});
+
+test('an uncertain send response does not trigger automatic retry', async ({page}) => {
+  await setup(page, {state: 'authenticated', account: {name: 'Church'}, sendingEnabled: true});
+  let sends = 0;
+  await page.route('http://churchcrm.test/plugins/telegram-client/api/send', (route) => {
+    sends++;
+    return route.fulfill({status: 503, contentType: 'application/json',
+      body: JSON.stringify({success: false, message: 'Telegram service unavailable'})});
+  });
+  page.on('dialog', dialog => dialog.accept());
+  await page.locator('#tg-recipient').fill('@recipient_user');
+  await page.locator('#tg-message').fill('Test message');
+  await page.locator('#tg-consent').check();
+  await page.locator('#tg-send').click();
+  await expect(page.locator('#tg-send-feedback')).toContainText('Do not retry automatically');
+  expect(sends).toBe(1);
+});
