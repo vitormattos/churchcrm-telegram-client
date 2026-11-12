@@ -36,7 +36,7 @@ jobs:
           test "$(tar -tzf "$worker" | cut -d/ -f1 | sort -u)" = telegram-client-worker
           test "$(tar -tzf "$worker" | grep -c 'telegram-client-worker/server.php')" = 1
           (cd dist && sha256sum -c *.sha256)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: telegram-release-packages
           path: dist/*
