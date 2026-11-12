@@ -113,8 +113,8 @@ try {
         reply(422, 'error', ['message' => 'Recipient not found on Telegram']);
     }
     $info = $api->getInfo($resolved);
-    if (!is_array($info) || !isset($info['InputPeer'])) {
-        reply(422, 'error', ['message' => 'Could not resolve recipient']);
+    if (!is_array($info) || !isset($info['InputPeer']) || !is_array($info['User'] ?? null)) {
+        reply(422, 'error', ['message' => 'Recipient must be a Telegram user, not a group or channel']);
     }
     if ($action === 'resolve') {
         $user = $info['User'] ?? [];
