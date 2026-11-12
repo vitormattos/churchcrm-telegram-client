@@ -12,7 +12,7 @@ $token = CSRFUtils::generateToken();
   <div class="card-body">
     <p>Configure API ID, API hash and private worker settings in <a href="<?= htmlspecialchars(SystemURLs::getRootPath(), ENT_QUOTES) ?>/plugins/management">Plugin Management</a>. Only administrators can access this page.</p>
     <div id="tg-status" class="alert alert-info" role="status" aria-live="polite">Checking connection…</div>
-    <div id="tg-account" class="mb-2"></div>
+    <div class="d-flex align-items-center gap-2 mb-2"><img id="tg-avatar" class="d-none rounded-circle" width="56" height="56" alt="Connected Telegram account avatar"><div id="tg-account"></div></div>
     <div class="d-flex flex-wrap gap-2 mb-3">
       <button type="button" class="btn btn-outline-secondary" id="tg-refresh">Refresh</button>
       <button type="button" class="btn btn-primary" id="tg-qr-button">Show login QR Code</button>
@@ -56,7 +56,7 @@ $token = CSRFUtils::generateToken();
   const base = window.CRM.root + '/plugins/telegram-client/api';
   const csrf = <?= json_encode($token, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   const $ = (name) => document.getElementById('tg-' + name);
-  let loggedIn = false, sendEnabled = false, polling = null, qrRefreshTimer = null;
+  let loggedIn = false, sendEnabled = false, polling = null, qrRefreshTimer = null, avatarAccountKey = null;
   function status(message, level = 'info') {
     $('status').className = 'alert alert-' + level;
     $('status').textContent = message;
@@ -80,6 +80,22 @@ $token = CSRFUtils::generateToken();
     $('qr').removeAttribute('src');
     $('qr-area').classList.add('d-none');
   }
+  function clearAvatar() {
+    $('avatar').removeAttribute('src');
+    $('avatar').classList.add('d-none');
+  }
+  async function loadAvatar(key) {
+    try {
+      const result = await api('/avatar');
+      if (!loggedIn || avatarAccountKey !== key || result.state !== 'avatar') return;
+      if (typeof result.image === 'string' && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(result.image)) {
+        $('avatar').src = result.image;
+        $('avatar').classList.remove('d-none');
+      }
+    } catch (_) {
+      clearAvatar();
+    }
+  }
   async function refresh() {
     try {
       const result = await api('/status');
@@ -92,6 +108,12 @@ $token = CSRFUtils::generateToken();
       $('account').textContent = loggedIn && result.account
         ? 'Connected account: ' + result.account.name + (result.account.username ? ' (@' + result.account.username + ')' : '')
         : '';
+      const key = loggedIn && result.account ? result.account.name + ':' + result.account.username : null;
+      if (key !== avatarAccountKey) {
+        avatarAccountKey = key;
+        clearAvatar();
+        if (key !== null) void loadAvatar(key);
+      }
       $('2fa-area').classList.toggle('d-none', result.state !== 'needs_2fa');
       $('hint').textContent = result.hint ? 'Password hint: ' + result.hint : '';
       if (loggedIn) {
@@ -104,6 +126,8 @@ $token = CSRFUtils::generateToken();
       $('send-status').className = 'alert alert-' + (sendEnabled ? 'success' : 'warning');
     } catch (error) {
       loggedIn = false;
+      avatarAccountKey = null;
+      clearAvatar();
       $('send').disabled = $('resolve').disabled = $('qr-button').disabled = true;
       status(error.message, 'danger');
     }

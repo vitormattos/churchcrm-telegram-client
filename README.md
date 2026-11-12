@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later -->
 A community ChurchCRM plugin for connecting a real Telegram user account, such as the church's phone, through **Telegram MTProto** and [MadelineProto](https://github.com/danog/MadelineProto). No Telegram Bot API or BotFather tokens.
 
 ## Features
-- Administrator-only QR login, two-step verification, account status and explicit session logout.
+- Administrator-only QR login, two-step verification, account name, username, profile photo and explicit session logout.
 - Persistent, dedicated Telegram session isolated in a private PHP worker.
 - Individually reviewed, consented plain-text messages to resolvable Telegram usernames or phones.
 - Sending disabled by default, no bulk campaigns or automatic retries.

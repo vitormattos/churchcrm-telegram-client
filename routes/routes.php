@@ -79,6 +79,7 @@ $app->group('/telegram-client/api', function (RouteCollectorProxy $group) use ($
         }
     };
     $group->get('/status', static fn (Request $req, Response $res): Response => $action($req, $res, 'status'));
+    $group->get('/avatar', static fn (Request $req, Response $res): Response => $action($req, $res, 'avatar'));
     foreach (['qr', '2fa', 'disconnect', 'resolve', 'send'] as $operation) {
         $group->post('/' . $operation, static fn (Request $req, Response $res): Response => $action($req, $res, $operation));
     }

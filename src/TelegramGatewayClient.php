@@ -39,7 +39,7 @@ final class TelegramGatewayClient
 
     public function request(string $action, array $payload = []): array
     {
-        if (!in_array($action, ['status', 'qr', '2fa', 'disconnect', 'send', 'resolve'], true)) {
+        if (!in_array($action, ['status', 'qr', '2fa', 'disconnect', 'send', 'resolve', 'avatar'], true)) {
             throw new \InvalidArgumentException('Unsupported action');
         }
         $curl = curl_init(rtrim($this->baseUrl, '/') . '/' . $action);

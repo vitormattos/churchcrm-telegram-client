@@ -21,6 +21,42 @@ function reply(int $http, string $state, array $other = []): never {
     echo json_encode(['state' => $state] + $other, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
     exit;
 }
+
+function accountAvatar(API $api, array $self): ?string {
+    $temporary = tempnam('/tmp', 'telegram-avatar-');
+    if ($temporary === false) {
+        return null;
+    }
+    try {
+        $userId = $self['id'] ?? null;
+        if (!is_int($userId)) {
+            return null;
+        }
+        $result = $api->photos->getUserPhotos(user_id: $userId, offset: 0, max_id: 0, limit: 1);
+        $photo = $result['photos'][0] ?? null;
+        if (!is_array($photo)) {
+            return null;
+        }
+        $api->downloadToFile($photo, $temporary);
+        $size = filesize($temporary);
+        if (!is_int($size) || $size < 1 || $size > 524288) {
+            return null;
+        }
+        $contents = file_get_contents($temporary);
+        if (!is_string($contents) || $contents === '') {
+            return null;
+        }
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->buffer($contents);
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+            return null;
+        }
+        return 'data:' . $mime . ';base64,' . base64_encode($contents);
+    } catch (Throwable) {
+        return null;
+    } finally {
+        @unlink($temporary);
+    }
+}
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     reply(405, 'error', ['message' => 'Method not allowed']);
 }
@@ -30,7 +66,7 @@ if (!is_string($secret) || strlen($secret) < 32 || !hash_equals('Bearer ' . $sec
     reply(403, 'error', ['message' => 'Forbidden']);
 }
 $action = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
-if (!in_array($action, ['status', 'qr', '2fa', 'send', 'resolve', 'disconnect'], true)) {
+if (!in_array($action, ['status', 'qr', '2fa', 'send', 'resolve', 'disconnect', 'avatar'], true)) {
     reply(404, 'error', ['message' => 'Unsupported operation']);
 }
 $raw = file_get_contents('php://input', false, null, 0, 8192);
@@ -64,6 +100,13 @@ try {
             reply(200, 'needs_2fa', ['hint' => $api->getHint()]);
         }
         reply(200, 'disconnected');
+    }
+    if ($action === 'avatar') {
+        if (!$authenticated) {
+            reply(409, 'error', ['message' => 'Authenticate the Telegram account first']);
+        }
+        $self = $api->getSelf();
+        reply(200, 'avatar', ['image' => is_array($self) ? accountAvatar($api, $self) : null]);
     }
     if ($action === 'qr') {
         if ($authenticated) {

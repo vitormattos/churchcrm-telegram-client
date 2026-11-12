@@ -80,6 +80,15 @@ test('two-factor password is erased from the form after completion', async ({pag
   await expect(page.locator('#tg-status')).toContainText('connected');
 });
 
+test('authenticated account displays only a validated inline avatar format', async ({page}) => {
+  await page.route('http://churchcrm.test/plugins/telegram-client/api/avatar', (route) =>
+    route.fulfill({status: 200, contentType: 'application/json',
+      body: JSON.stringify({success: true, data: {state: 'avatar', image: 'data:image/png;base64,aGVsbG8='}})}));
+  await setup(page, {state: 'authenticated', account: {name: 'Church', username: 'church_account'}, sendingEnabled: false});
+  await expect(page.locator('#tg-avatar')).toHaveAttribute('src', 'data:image/png;base64,aGVsbG8=');
+  await expect(page.locator('#tg-avatar')).toBeVisible();
+});
+
 test('an uncertain send response does not trigger automatic retry', async ({page}) => {
   await setup(page, {state: 'authenticated', account: {name: 'Church'}, sendingEnabled: true});
   let sends = 0;
