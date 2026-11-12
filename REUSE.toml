@@ -1,0 +1,15 @@
+version = 1
+
+[[annotations]]
+path = ["LICENSE", "LICENSES/**"]
+SPDX-FileCopyrightText = "2026 Vitor Mattos"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = ["*.json", "*.yaml", "*.yml", "*.xml", "*.lock", ".gitignore",
+        "REUSE.toml", "docs/**", "README.md", "Dockerfile", "compose.yaml",
+        "*.sh", ".github/**", "worker/composer.json", "worker/composer.lock",
+        "worker/.env.example", "worker/.gitignore", "vendor-bin/*/composer.json",
+        "vendor-bin/*/composer.lock", "tests/php/phpunit.xml"]
+SPDX-FileCopyrightText = "2026 Vitor Mattos"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

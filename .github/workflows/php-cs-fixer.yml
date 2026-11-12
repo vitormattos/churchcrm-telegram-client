@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2026 Vitor Mattos
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: PHP-CS-Fixer
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: php-cs-fixer-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  coding-standard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, mbstring, dom, xml
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-scripts
+      - run: composer bin coding-standard install --no-interaction --prefer-dist
+      - run: composer run cs:check

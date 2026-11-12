@@ -1,0 +1,33 @@
+{
+  "name": "vitormattos/churchcrm-telegram-client",
+  "description": "ChurchCRM Telegram Client API community plugin",
+  "type": "project",
+  "license": "AGPL-3.0-or-later",
+  "require-dev": {
+    "bamarni/composer-bin-plugin": "^1.8"
+  },
+  "config": {
+    "allow-plugins": {
+      "bamarni/composer-bin-plugin": true
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "bamarni-bin": {
+      "bin-links": true,
+      "forward-command": true
+    }
+  },
+  "scripts": {
+    "test:unit": "vendor/bin/phpunit -c tests/php/phpunit.xml --testsuite unit --no-coverage",
+    "test:integration": "vendor/bin/phpunit -c tests/php/phpunit.xml --testsuite integration --no-coverage",
+    "psalm": "vendor/bin/psalm --no-cache --threads=1",
+    "psalm:taint": "vendor/bin/psalm --taint-analysis --no-cache --threads=1",
+    "cs:check": "vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no",
+    "cs:fix": "vendor/bin/php-cs-fixer fix --using-cache=no",
+    "lint:php": "find src routes views worker tests/php -name '*.php' -exec php -l {} \\;"
+  },
+  "require": {
+    "php": "^8.4"
+  }
+}

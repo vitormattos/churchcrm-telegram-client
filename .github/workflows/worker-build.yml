@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 Vitor Mattos
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Worker Docker build
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: docker build --pull -t churchcrm-telegram-worker:test worker
+      - run: |
+          docker run --rm churchcrm-telegram-worker:test php -l /app/server.php
+          sh tests/integration/worker-smoke.sh churchcrm-telegram-worker:test

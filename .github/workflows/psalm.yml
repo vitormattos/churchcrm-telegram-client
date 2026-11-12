@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Vitor Mattos
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Psalm and taint analysis
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, mbstring, dom, xml
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-scripts
+      - run: composer bin psalm install --no-interaction --prefer-dist
+      - run: composer run psalm
+      - run: composer run psalm:taint

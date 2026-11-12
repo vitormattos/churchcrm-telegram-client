@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Vitor Mattos
+# SPDX-License-Identifier: AGPL-3.0-or-later
+services:
+  telegram-client:
+    build: .
+    restart: unless-stopped
+    env_file: [.env]
+    volumes:
+      - ./state:/state
+    networks:
+      churchcrm:
+        aliases: [telegram-client]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    mem_limit: 768m
+    pids_limit: 128
+networks:
+  churchcrm:
+    external: true
+    name: church-crm_internal

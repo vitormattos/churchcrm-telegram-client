@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<psalm xmlns="https://getpsalm.org/schema/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor-bin/psalm/vendor/vimeo/psalm/config.xsd"
+    errorLevel="5" phpVersion="8.4" resolveFromConfigFile="true" findUnusedCode="false">
+  <projectFiles>
+    <directory name="src" />
+  </projectFiles>
+  <stubs><file name="tests/stubs/ChurchCRMPlugin.php" /></stubs>
+</psalm>

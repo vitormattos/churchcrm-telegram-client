@@ -1,0 +1,57 @@
+{
+  "id": "telegram-client",
+  "name": "Telegram (MTProto)",
+  "license": "AGPL-3.0-or-later",
+  "description": "Admin-only Telegram Client API integration (real account, no bots).",
+  "version": "0.1.0",
+  "author": "Vitor Mattos",
+  "authorUrl": "https://github.com/vitormattos",
+  "type": "community",
+  "minimumCRMVersion": "7.0.0",
+  "mainClass": "ChurchCRM\\Plugins\\TelegramClient\\TelegramClientPlugin",
+  "routesFile": "routes/routes.php",
+  "dependencies": [],
+  "settings": [
+    {
+      "key": "apiId",
+      "label": "Telegram API ID",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "apiHash",
+      "label": "Telegram API hash",
+      "type": "password",
+      "required": true
+    },
+    {
+      "key": "gatewayUrl",
+      "label": "Internal worker URL",
+      "type": "text",
+      "required": true,
+      "help": "Private Docker DNS; never use a public URL"
+    },
+    {
+      "key": "gatewaySecret",
+      "label": "Internal worker authentication key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "key": "sendingEnabled",
+      "label": "Allow sending individual messages",
+      "type": "boolean",
+      "default": false
+    }
+  ],
+  "menuItems": [
+    {
+      "parent": "admin",
+      "label": "Telegram",
+      "url": "plugins/telegram-client/manage",
+      "icon": "fa-brands fa-telegram",
+      "permission": "bAdmin"
+    }
+  ],
+  "hasTest": true
+}

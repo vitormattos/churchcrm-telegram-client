@@ -1,0 +1,14 @@
+{
+  "name": "vitormattos/churchcrm-telegram-worker",
+  "description": "Isolated MadelineProto worker",
+  "license": "AGPL-3.0-or-later",
+  "require": {
+    "php": "^8.3",
+    "danog/madelineproto": "^8.0",
+    "endroid/qr-code": "^6.0"
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true
+  }
+}
