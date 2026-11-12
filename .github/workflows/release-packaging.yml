@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Vitor Mattos
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Reproducible release packages
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Package twice from the same commit
+        run: |
+          sh scripts/package-release.sh HEAD dist
+          sh scripts/package-release.sh HEAD "$RUNNER_TEMP/package-b"
+      - name: Verify reproducibility and distributable boundaries
+        run: |
+          set -eu
+          for archive in dist/*; do
+            cmp "$archive" "$RUNNER_TEMP/package-b/$(basename "$archive")"
+          done
+          plugin=$(find dist -maxdepth 1 -name 'telegram-client-*.zip' -print -quit)
+          worker=$(find dist -maxdepth 1 -name 'telegram-client-worker-*.tar.gz' -print -quit)
+          test -n "$plugin" && test -n "$worker"
+          unzip -t "$plugin"
+          test "$(unzip -Z1 "$plugin" | cut -d/ -f1 | sort -u)" = telegram-client
+          if unzip -Z1 "$plugin" | grep -E '(^|/)(vendor|node_modules|worker|state|\.git|\.env)(/|$)|\.(sh|phar|phtml|exe|so)$'; then
+            echo "A forbidden path was found inside the plugin ZIP" >&2
+            exit 1
+          fi
+          tar -tzf "$worker"
+          test "$(tar -tzf "$worker" | cut -d/ -f1 | sort -u)" = telegram-client-worker
+          test "$(tar -tzf "$worker" | grep -c 'telegram-client-worker/server.php')" = 1
+          (cd dist && sha256sum -c *.sha256)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: telegram-release-packages
+          path: dist/*
+          retention-days: 7

@@ -6,6 +6,8 @@
 **/.php-cs-fixer.cache
 /playwright-report/
 /test-results/
+/dist/
+/.packaging.*/
 /.phpunit.cache/
 /.env
 **/state/

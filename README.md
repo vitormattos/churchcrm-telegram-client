@@ -19,6 +19,10 @@ ChurchCRM 7, Docker Compose, API credentials from [my.telegram.org/apps](https:/
 ## Documentation
 [Installation](docs/installation.md) · [Configuration](docs/configuration.md) · [QR authentication](docs/authentication.md) · [Sending](docs/sending.md) · [Operations](docs/operations.md) · [Security](docs/security.md) · [Development](docs/development.md)
 
+## Releases and ChurchCRM catalog
+
+A tagged release publishes two separate packages: the ChurchCRM installer ZIP and a dedicated worker archive. The catalog ZIP intentionally contains no Telegram session, worker dependencies or service executable. The operator provisions the private worker separately before configuring the plugin. See [release instructions](docs/release.md), [security assessment](docs/security-audit.md), and [vulnerability disclosure](SECURITY.md).
+
 ## Sponsor the maintainer
 
 This independent community project is maintained by **Vitor Mattos**. Support ongoing development and maintenance through [GitHub Sponsors](https://github.com/sponsors/vitormattos). Sponsorship is for the individual maintainer, not LibreCode.
